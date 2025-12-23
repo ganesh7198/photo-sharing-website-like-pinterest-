@@ -1,5 +1,6 @@
 import User from "../models/user.model.js";
 import Post from "../models/post.model.js"
+import Notification from "../models/notification.model.js"; 
 import {v2 as cloudinary} from "cloudinary";
 export const createpost = async (req, res) => {
   try {
@@ -73,29 +74,59 @@ export const deletepost = async (req, res) => {
   }
 };
 
-export const  likepost= async(req,res)=>{
-    try{
-		const {postid}=req.params;
-		const userid=req.user._id;
-		const post= await Post.findById(postid);
-		if(!post){
-			return res.status(404).json({meassage:"post is not found "});
-		}
-		const isliked= post.likes.includes(userid);
-		if(isliked){
-		const updatedvalue=	await Post.findByIdAndUpdate(postid,{$pull:{likes:userid}},{new:true});
-		return res.status(201).json(updatedvalue)
-		}
-		if(!isliked){
-		const updatedvalue=	await Post.findByIdAndUpdate(postid,{$push:{likes:userid}},{new:true});
-		return res.status(201).json(updatedvalue)
-		}
-		await post.save();
-		res.status(201).json({message:"liked added or removed succuessfully"});
-	}catch(error){
-       res.status(500).json({message:"internal error"})
-	}
-}
+export const likePost = async (req, res) => {
+  try {
+    const { postid } = req.params;
+    const userid = req.user._id;
+
+    // Find the post by ID
+    const post = await Post.findById(postid);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    const isLiked = post.likes.includes(userid);
+
+    if (isLiked) {
+      // User has already liked the post, so we remove the like
+      const updatedPost = await Post.findByIdAndUpdate(
+        postid,
+        { $pull: { likes: userid } },
+        { new: true }  // Return the updated post
+      );
+
+      // Optionally, delete the notification if exists
+      await Notification.findOneAndDelete({
+        from: userid,
+        to: post.user,  // the user whose post was liked
+        type: "like",
+      });
+
+      return res.status(200).json(updatedPost);  // Return the updated post with the new likes array
+    } else {
+      // User has not liked the post, so we add the like
+      const updatedPost = await Post.findByIdAndUpdate(
+        postid,
+        { $push: { likes: userid } },
+        { new: true }  // Return the updated post
+      );
+
+      // Create a notification for the like action
+      const notification = new Notification({
+        from: userid,
+        to: post.user,  // the user whose post was liked
+        type: "like",
+      });
+
+      await notification.save();  // Save the notification
+
+      return res.status(200).json(updatedPost);  // Return the updated post with the new likes array
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 export const  commentpost=async(req,res)=>{
     try{
@@ -128,3 +159,22 @@ export const  commentpost=async(req,res)=>{
        res.status(500).json({message:"internal server error"})
 	}
 }
+
+export const getAllPostsByUser = async (req, res) => {
+  try {
+    const { userId } = req.params;  // Extract userId from request params
+
+    // Find all posts created by the specific user
+    const posts = await Post.find({ user: userId });
+
+    if (posts.length === 0) {
+      return res.status(404).json({ message: "No posts found for this user" });
+    }
+
+    // Send back the posts
+    return res.status(200).json(posts);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
