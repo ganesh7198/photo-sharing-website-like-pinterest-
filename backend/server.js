@@ -11,6 +11,7 @@ cloudinary.config({
 import authRoutes from "./routes/authRoutes.routes.js";
 import post from "./routes/post.routes.js";
 import user from "./routes/user.routes.js"
+import notification from "./routes/notification.routes.js"
 import connectmongodb from "./Database/db.js";
 import cookieParser from "cookie-parser";
 const app = express();
@@ -20,6 +21,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/user",user)
 app.use("/api/post",post)
+app.use("/api/notification",notification);
 const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   try {
