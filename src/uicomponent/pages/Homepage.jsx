@@ -148,7 +148,7 @@ const pinterestCards = [
           <div id="features" className="py-16 bg-gradient-to-b from-white to-gray-50 rounded-3xl mb-20">
             <div className="max-w-6xl mx-auto px-6">
               <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-                Why creators love SnapShare
+                Why creators love SnapShare !
               </h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {features.map((feature, index) => (
