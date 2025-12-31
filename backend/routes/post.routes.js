@@ -10,7 +10,7 @@ router.post("/like-post/:id",protectroute,likePost)
 router.get("/get-user-post/:username",protectroute,getuserpost)
 router.get("/liked-post/:id",protectroute,likedbyuser)
 router.post("/comment-post/:postid",protectroute,commentpost)
-router.get("/get-all-post/:id",protectroute,getAllPostsByUser)
+router.get( "/posts", protectroute, getAllPostsByUser);
 router.get("/get-following-post",protectroute,getfollowingpost);
 
 export default router;

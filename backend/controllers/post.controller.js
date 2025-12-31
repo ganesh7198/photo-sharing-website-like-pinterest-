@@ -152,7 +152,7 @@ export const  commentpost=async(req,res)=>{
 
 export const getAllPostsByUser = async (req, res) => {
   try {
-    const { id } = req.params;  // Extract id from request params
+     
 
     // Find all posts created by the specific user
     const posts = await Post.find().sort({createdAt:-1}).populate({path:"user",select:"-password"}).populate({
@@ -160,7 +160,7 @@ export const getAllPostsByUser = async (req, res) => {
       select:"-password"
     });
     if (posts.length === 0) {
-      return res.status(404).json({ message: "No posts found for this user" });
+      return res.status(404).json({ message: "No posts found " });
     }
 
     // Send back the posts
