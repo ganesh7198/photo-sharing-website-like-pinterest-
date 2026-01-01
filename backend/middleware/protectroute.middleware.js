@@ -5,6 +5,7 @@ export const protectroute = async (req, res, next) => {
   try {
     // ✅ get token from request cookies
     const token = req.cookies.jwt;
+    
 
     if (!token) {
       return res.status(401).json({
