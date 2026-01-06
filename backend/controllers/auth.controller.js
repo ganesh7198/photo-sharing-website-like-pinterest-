@@ -10,7 +10,7 @@ export const LoginController=async(req,res)=>{
     if(!user || !ispasswordcorrect){
        return res.status(404).json({message:"user is not found "})
     }
-    generateTokenAndSetCookie(user._id,res );
+    generateTokenAndSetCookie(user._id,res);
     res.status(201).json({
       sucess:true,
       message:"sucessfull login welcome to our website",
@@ -18,7 +18,7 @@ export const LoginController=async(req,res)=>{
       usename:user.username,
     })
 }catch(error){
-     console.log("error in the login controller ")
+     console.log("error in the login controller ",error.message)
      res.status(500).json({
       success:false,
       message:"error in login controller internal server error"
@@ -72,7 +72,6 @@ export const SingupController = async (req, res) => {
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-
     // Create user
     const newUser = new User({
       fullname,
@@ -82,9 +81,9 @@ export const SingupController = async (req, res) => {
     });
 
     await newUser.save();
+    generateTokenAndSetCookie(newUser._id,res);
 
-    // Generate JWT and set cookie
-    generateTokenAndSetCookie(newUser._id, res);
+
 
     res.status(201).json({
       success: true,
