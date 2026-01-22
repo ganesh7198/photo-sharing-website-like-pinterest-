@@ -82,9 +82,6 @@ export const SingupController = async (req, res) => {
 
     await newUser.save();
     generateTokenAndSetCookie(newUser._id,res);
-
-
-
     res.status(201).json({
       success: true,
       message: "Successfully created user",
