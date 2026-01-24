@@ -32,7 +32,6 @@ export const createPost = async (req, res) => {
 
 };
 
-
 export const deletepost = async (req, res) => {
   try {
     const { postId } = req.params;
