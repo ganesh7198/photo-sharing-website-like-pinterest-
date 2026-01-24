@@ -6,7 +6,7 @@ import { UserContext } from '../context/UserContext';
 const ProtectedRoute = () => {
   const [loading, setLoading] = useState(true);
   const [auth, setAuth] = useState(false);
-  const { setuserinfo } = useContext(UserContext);
+  const { setUserInfo } = useContext(UserContext);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -16,7 +16,7 @@ const ProtectedRoute = () => {
         });
 
         if (res.data) {
-          setuserinfo(res.data);
+          setUserInfo(res.data);
           setAuth(true);
         }
       } catch (error) {
@@ -28,7 +28,7 @@ const ProtectedRoute = () => {
     };
 
     checkUser();
-  }, [setuserinfo]);
+  }, [setUserInfo]);
 
   if (loading) return <h2>Loading...</h2>;
 

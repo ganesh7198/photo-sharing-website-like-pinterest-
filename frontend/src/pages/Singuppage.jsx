@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { signupApi } from '../services/signupApi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +13,7 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
@@ -30,6 +31,7 @@ const Signup = () => {
     try {
       const res = await signupApi(formData);
       setSuccess(res.message);
+      navigate('/home');
       console.log('User created:', res);
     } catch (err) {
       setError(err.message || 'Signup failed');

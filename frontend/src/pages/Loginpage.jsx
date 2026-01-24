@@ -30,7 +30,7 @@ const Loginpage = () => {
 
     try {
       const res = await loginApi(formData);
-      setSuccess(res.message);
+      setSuccess(res.data.message);
       nagivate('/home');
       console.log('User:', res);
     } catch (err) {

@@ -63,8 +63,8 @@ export const deletepost = async (req, res) => {
 
 export const likePost = async (req, res) => {
   try {
-    const {id} = req.params;
-    const userid = req.user._id;
+    const { id } = req.params; // post ID
+    const userid = req.user._id; // logged-in user ID
 
     // Find the post by ID
     const post = await Post.findById(id);
@@ -72,50 +72,53 @@ export const likePost = async (req, res) => {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    const isLiked = post.likes.includes(id);
+    // ✅ Correct check: is this user already in likes array?
+    const isLiked = post.likes.includes(userid);
 
     if (isLiked) {
-      // User has already liked the post, so we remove the like
+      // Remove like
       const updatedPost = await Post.findByIdAndUpdate(
         id,
         { $pull: { likes: userid } },
-        { new: true }  // Return the updated post
+        { new: true }
       );
-       await User.findByIdAndUpdate(userid,{$pull:{likedpost:id}},{new :true});
-      // Optionally, delete the notification if exists
+
+      await User.findByIdAndUpdate(userid, { $pull: { likedpost: id } }, { new: true });
+
+      // Delete notification
       await Notification.findOneAndDelete({
         from: userid,
-        to: post.user,  // the user whose post was liked
+        to: post.user,
         type: "like",
       });
 
-      return res.status(200).json(updatedPost);  // Return the updated post with the new likes array
+      return res.status(200).json(updatedPost);
     } else {
-      // User has not liked the post, so we add the like
+      // Add like
       const updatedPost = await Post.findByIdAndUpdate(
         id,
         { $push: { likes: userid } },
-        { new: true }  // Return the updated post
+        { new: true }
       );
-      await User.findByIdAndUpdate(userid,{$push:{likedpost:id}},{new :true});
-      
 
-      // Create a notification for the like action
+      await User.findByIdAndUpdate(userid, { $push: { likedpost: id } }, { new: true });
+
+      // Create notification
       const notification = new Notification({
         from: userid,
-        to: post.user,  // the user whose post was liked
+        to: post.user,
         type: "like",
       });
+      await notification.save();
 
-      await notification.save();  // Save the notification
-
-      return res.status(200).json(updatedPost);  // Return the updated post with the new likes array
+      return res.status(200).json(updatedPost);
     }
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 export const  commentpost=async(req,res)=>{
     try{
@@ -163,7 +166,7 @@ export const getAllPostsByUser = async (req, res) => {
     }
 
     // Send back the posts
-    return res.status(200).json(posts);
+    return res.status(200).json({posts:posts});
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal server error" });
