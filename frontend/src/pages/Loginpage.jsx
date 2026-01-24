@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import loginApi from '../services/loginApi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Loginpage = () => {
   const [formData, setFormData] = useState({
@@ -11,6 +11,7 @@ const Loginpage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const nagivate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
@@ -30,6 +31,7 @@ const Loginpage = () => {
     try {
       const res = await loginApi(formData);
       setSuccess(res.message);
+      nagivate('/home');
       console.log('User:', res);
     } catch (err) {
       setError(err.message || 'Login failed');
@@ -83,11 +85,11 @@ const Loginpage = () => {
             {loading ? 'Logging in...' : 'Login'}
           </button>
           <p className="text-center text-sm text-gray-500 mt-4">
-                    Don't have an account?{' '}
-                    <span className="text-indigo-600 cursor-pointer hover:underline">
-                      <Link to="/signup">Signup</Link>
-                    </span>
-                  </p>
+            Don't have an account?{' '}
+            <span className="text-indigo-600 cursor-pointer hover:underline">
+              <Link to="/signup">Signup</Link>
+            </span>
+          </p>
         </form>
       </div>
     </div>

@@ -1,10 +1,12 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
+import { UserContext } from '../context/UserContext';
 
 const ProtectedRoute = () => {
   const [loading, setLoading] = useState(true);
   const [auth, setAuth] = useState(false);
+  const { setuserinfo } = useContext(UserContext);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -14,6 +16,7 @@ const ProtectedRoute = () => {
         });
 
         if (res.data) {
+          setuserinfo(res.data);
           setAuth(true);
         }
       } catch (error) {
@@ -25,7 +28,7 @@ const ProtectedRoute = () => {
     };
 
     checkUser();
-  }, []);
+  }, [setuserinfo]);
 
   if (loading) return <h2>Loading...</h2>;
 
