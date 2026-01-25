@@ -325,9 +325,6 @@ const Profilepage = () => {
 
               {/* Bio */}
               <div>
-                <h2 className="font-semibold text-gray-900">
-                  {profile.fullname}
-                </h2>
                 <p className="text-gray-800 text-sm mt-1">
                   {profile.bio || 'No bio yet.'}
                 </p>

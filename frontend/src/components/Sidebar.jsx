@@ -26,14 +26,9 @@ const Sidebar = () => {
         </li>
 
         <li>
-          {userInfo && (
-            <Link
-              to={`/upload/${userInfo._id}`}
-              className="hover:text-gray-300"
-            >
-              Upload
-            </Link>
-          )}
+          <Link to={'/upload'} className="hover:text-gray-300">
+            Upload
+          </Link>
         </li>
 
         <li>

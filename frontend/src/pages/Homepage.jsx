@@ -59,7 +59,7 @@ const Homepage = () => {
         });
       }, 1000);
     },
-    [userInfo, handleLike]
+    [userInfo]
   );
 
   // Like handler
@@ -409,9 +409,7 @@ const Homepage = () => {
                             .getElementById(`comment-input-${post._id}`)
                             ?.focus();
                         }}
-                      >
-                        <FiMessageCircle className="text-gray-900 text-xl" />
-                      </button>
+                      ></button>
                     </div>
                   </div>
 
@@ -453,10 +451,7 @@ const Homepage = () => {
                       {displayedComments.map((comment, index) => (
                         <div key={comment._id || index} className="text-sm">
                           <p className="text-gray-900">
-                            <span className="font-semibold mr-2">
-                              {/* You might want to fetch username for comment author here */}
-                              User
-                            </span>
+                            <span className="font-semibold mr-2"></span>
                             {comment.text}
                           </p>
                         </div>

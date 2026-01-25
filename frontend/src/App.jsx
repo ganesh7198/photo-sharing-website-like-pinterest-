@@ -6,6 +6,7 @@ import ProtectedRoute from './services/ProtectedRoute';
 import MainLayout from './layout.jsx/MainLayout';
 import Homepage from './pages/Homepage';
 import Profilepage from './pages/Profilepage';
+import Uploadpage from './pages/Uploadpage';
 
 function App() {
   return (
@@ -17,12 +18,11 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
           <Route path="/home" element={<Homepage />} />
-
-          {/* profile by username */}
+          {/* This route must come BEFORE the /profile route */}
           <Route path="/profile/:username" element={<Profilepage />} />
-
-          {/* default profile (logged-in user) */}
+          {/* Default profile - will redirect to /profile/:username */}
           <Route path="/profile" element={<Profilepage />} />
+          <Route path="/upload" element={<Uploadpage></Uploadpage>}></Route>
         </Route>
       </Route>
     </Routes>
