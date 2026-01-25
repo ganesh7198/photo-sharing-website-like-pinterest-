@@ -59,7 +59,7 @@ const Homepage = () => {
         });
       }, 1000);
     },
-    [userInfo]
+    [userInfo, handleLike]
   );
 
   // Like handler
@@ -231,7 +231,7 @@ const Homepage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <div className="min-h-screen   from-gray-50 to-white">
         <div className="max-w-xl mx-auto py-6 px-4">
           {[1, 2, 3].map((i) => (
             <div
@@ -245,7 +245,7 @@ const Homepage = () => {
                   <div className="h-2 bg-gray-200 rounded w-1/6" />
                 </div>
               </div>
-              <div className="w-full h-[500px] bg-gray-200" />
+              <div className="w-full h-125 bg-gray-200" />
               <div className="p-4 space-y-3">
                 <div className="h-6 bg-gray-200 rounded w-1/3" />
                 <div className="h-3 bg-gray-200 rounded w-2/3" />
@@ -259,11 +259,11 @@ const Homepage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-white">
       <div className="max-w-xl mx-auto py-6 px-4">
         {posts.length === 0 ? (
           <div className="text-center mt-32">
-            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center">
+            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-linear-to-br from-pink-100 to-purple-100 flex items-center justify-center">
               <FiMessageCircle className="text-4xl text-purple-400" />
             </div>
             <h2 className="text-2xl font-light text-gray-800 mb-2">
@@ -276,7 +276,7 @@ const Homepage = () => {
             {userInfo && (
               <Link
                 to={`/upload/${userInfo._id}`}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full hover:shadow-lg transition-all duration-300"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-purple-500 to-pink-500 text-white rounded-full hover:shadow-lg transition-all duration-300"
               >
                 <span className="font-medium">Share your first photo</span>
               </Link>
@@ -342,7 +342,7 @@ const Homepage = () => {
                         className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                           isFollowing
                             ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            : 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:shadow-md'
+                            : 'bg-linear-to-r from-blue-500 to-cyan-500 text-white hover:shadow-md'
                         }`}
                       >
                         {followingUserId === post.user._id
@@ -367,7 +367,7 @@ const Homepage = () => {
                     <img
                       src={post.img}
                       alt="post"
-                      className="w-full h-auto max-h-[600px] object-cover bg-gray-50"
+                      className="w-full h-auto max-h-150 object-cover bg-gray-50"
                       loading="lazy"
                       onError={(e) => {
                         e.target.src =

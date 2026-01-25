@@ -58,7 +58,7 @@ const Loginpage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-purple-600">
+    <div className="flex items-center justify-center min-h-screen bg-linear-to-r from-blue-500 to-purple-600">
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
           Login to Your Account

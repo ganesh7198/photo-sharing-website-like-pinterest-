@@ -241,7 +241,7 @@ const Profilepage = () => {
           <div className="flex items-center gap-8">
             {/* Profile Image - Instagram Circle */}
             <div className="relative">
-              <div className="w-36 h-36 rounded-full p-1 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500">
+              <div className="w-36 h-36 rounded-full p-1 bg-linear-to-r from-purple-500 via-pink-500 to-orange-500">
                 <img
                   src={profile.profileimg || defaultProfileImage}
                   alt={`${profile.username}'s profile`}
