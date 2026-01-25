@@ -19,6 +19,9 @@ const Homepage = () => {
   const [likingPostId, setLikingPostId] = useState(null);
   const [followingUserId, setFollowingUserId] = useState(null);
   const [likedPosts, setLikedPosts] = useState(new Set());
+  const [commentInputs, setCommentInputs] = useState({});
+  const [postingCommentId, setPostingCommentId] = useState(null);
+  const [expandedComments, setExpandedComments] = useState({});
 
   // Fetch posts
   useEffect(() => {
@@ -26,6 +29,13 @@ const Homepage = () => {
       try {
         const data = await getAllPosts();
         setPosts(data.posts);
+
+        // Initialize comment inputs for each post
+        const inputs = {};
+        data.posts.forEach((post) => {
+          inputs[post._id] = '';
+        });
+        setCommentInputs(inputs);
       } catch (error) {
         console.log('Error fetching posts', error);
       } finally {
@@ -125,6 +135,100 @@ const Homepage = () => {
     }
   };
 
+  // Handle comment input change
+  const handleCommentChange = (postId, value) => {
+    setCommentInputs((prev) => ({
+      ...prev,
+      [postId]: value,
+    }));
+  };
+
+  // Submit comment
+  const handleCommentSubmit = async (postId) => {
+    if (!userInfo || !commentInputs[postId]?.trim()) return;
+
+    const commentText = commentInputs[postId].trim();
+    setPostingCommentId(postId);
+
+    try {
+      // Optimistic update
+      const newComment = {
+        text: commentText,
+        user: userInfo._id,
+        _id: `temp-${Date.now()}`, // Temporary ID
+      };
+
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post._id === postId
+            ? {
+                ...post,
+                comment: [...(post.comment || []), newComment],
+              }
+            : post
+        )
+      );
+
+      // Clear input
+      setCommentInputs((prev) => ({
+        ...prev,
+        [postId]: '',
+      }));
+
+      // Send to API
+      const res = await axios.post(
+        `http://localhost:5000/api/post/comment-post/${postId}`,
+        { text: commentText },
+        { withCredentials: true }
+      );
+
+      // Update with real data from server
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post._id === postId
+            ? { ...post, comment: res.data.comment || res.data.comments }
+            : post
+        )
+      );
+    } catch (error) {
+      console.log('Error posting comment:', error);
+      // Revert optimistic update on error
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post._id === postId
+            ? {
+                ...post,
+                comment: post.comment.filter(
+                  (c) => !c._id?.startsWith('temp-')
+                ),
+              }
+            : post
+        )
+      );
+
+      // Show error message (you could add a toast notification here)
+      alert('Failed to post comment. Please try again.');
+    } finally {
+      setPostingCommentId(null);
+    }
+  };
+
+  // Handle Enter key for comment submission
+  const handleKeyPress = (e, postId) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleCommentSubmit(postId);
+    }
+  };
+
+  // Toggle expanded comments
+  const toggleComments = (postId) => {
+    setExpandedComments((prev) => ({
+      ...prev,
+      [postId]: !prev[postId],
+    }));
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -184,6 +288,12 @@ const Homepage = () => {
             const isFollowing = userInfo?.following.includes(post.user._id);
             const isOwnPost = post.user._id === userInfo?._id;
             const isDoubleTapLiked = likedPosts.has(post._id);
+            const comments = post.comment || [];
+            const showAllComments = expandedComments[post._id];
+            const displayedComments = showAllComments
+              ? comments
+              : comments.slice(0, 2);
+            const hasMoreComments = comments.length > 2;
 
             return (
               <div
@@ -291,7 +401,15 @@ const Homepage = () => {
                           <FiHeart className="text-gray-900 text-xl" />
                         )}
                       </button>
-                      <button className="p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200">
+                      <button
+                        className="p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200"
+                        onClick={() => {
+                          // Focus on comment input when comment button is clicked
+                          document
+                            .getElementById(`comment-input-${post._id}`)
+                            ?.focus();
+                        }}
+                      >
                         <FiMessageCircle className="text-gray-900 text-xl" />
                       </button>
                     </div>
@@ -307,11 +425,57 @@ const Homepage = () => {
 
                   {/* Caption */}
                   <div className="mb-3">
-                    <p className="text-gray-900">{post.text}</p>
+                    <p className="text-gray-900">
+                      <Link
+                        to={`/profile/${post.user.username}`}
+                        className="font-semibold mr-2 hover:text-gray-700"
+                      >
+                        {post.user?.username}
+                      </Link>
+                      {post.text}
+                    </p>
                   </div>
 
+                  {/* Comments Section */}
+                  {comments.length > 0 && (
+                    <div className="mb-3 space-y-2">
+                      {/* View all comments button */}
+                      {hasMoreComments && !showAllComments && (
+                        <button
+                          onClick={() => toggleComments(post._id)}
+                          className="text-gray-500 text-sm hover:text-gray-700 transition-colors"
+                        >
+                          View all {comments.length} comments
+                        </button>
+                      )}
+
+                      {/* Display comments */}
+                      {displayedComments.map((comment, index) => (
+                        <div key={comment._id || index} className="text-sm">
+                          <p className="text-gray-900">
+                            <span className="font-semibold mr-2">
+                              {/* You might want to fetch username for comment author here */}
+                              User
+                            </span>
+                            {comment.text}
+                          </p>
+                        </div>
+                      ))}
+
+                      {/* Show less button */}
+                      {showAllComments && hasMoreComments && (
+                        <button
+                          onClick={() => toggleComments(post._id)}
+                          className="text-gray-500 text-sm hover:text-gray-700 transition-colors"
+                        >
+                          Show less
+                        </button>
+                      )}
+                    </div>
+                  )}
+
                   {/* Time */}
-                  <p className="text-xs text-gray-400 uppercase tracking-wider">
+                  <p className="text-xs text-gray-400 uppercase tracking-wider mb-3">
                     {new Date(post.createdAt).toLocaleDateString('en-US', {
                       month: 'long',
                       day: 'numeric',
@@ -324,12 +488,31 @@ const Homepage = () => {
                 <div className="border-t border-gray-100 p-4">
                   <div className="flex items-center gap-3">
                     <input
+                      id={`comment-input-${post._id}`}
                       type="text"
                       placeholder="Add a comment..."
-                      className="flex-1 border-none outline-none text-sm placeholder-gray-400"
+                      value={commentInputs[post._id] || ''}
+                      onChange={(e) =>
+                        handleCommentChange(post._id, e.target.value)
+                      }
+                      onKeyPress={(e) => handleKeyPress(e, post._id)}
+                      disabled={postingCommentId === post._id}
+                      className="flex-1 border-none outline-none text-sm placeholder-gray-400 disabled:opacity-50"
                     />
-                    <button className="text-blue-500 font-medium text-sm hover:text-blue-600 transition-colors">
-                      Post
+                    <button
+                      onClick={() => handleCommentSubmit(post._id)}
+                      disabled={
+                        !commentInputs[post._id]?.trim() ||
+                        postingCommentId === post._id
+                      }
+                      className={`font-medium text-sm transition-colors ${
+                        commentInputs[post._id]?.trim() &&
+                        postingCommentId !== post._id
+                          ? 'text-blue-500 hover:text-blue-600'
+                          : 'text-gray-400 cursor-not-allowed'
+                      }`}
+                    >
+                      {postingCommentId === post._id ? 'Posting...' : 'Post'}
                     </button>
                   </div>
                 </div>
