@@ -2,13 +2,23 @@ import { useEffect, useState, useCallback, useContext } from 'react';
 import { getAllPosts } from '../services/getAllPosts';
 import axios from 'axios';
 import { UserContext } from '../context/UserContext';
+import { Link } from 'react-router-dom';
+import {
+  FiHeart,
+  FiMessageCircle,
+  FiSend,
+  FiBookmark,
+  FiMoreHorizontal,
+} from 'react-icons/fi';
+import { FaHeart } from 'react-icons/fa';
 
 const Homepage = () => {
-  const { userInfo, setUserInfo } = useContext(UserContext); // get logged-in user
+  const { userInfo, setUserInfo } = useContext(UserContext);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [likingPostId, setLikingPostId] = useState(null);
   const [followingUserId, setFollowingUserId] = useState(null);
+  const [likedPosts, setLikedPosts] = useState(new Set());
 
   // Fetch posts
   useEffect(() => {
@@ -24,6 +34,23 @@ const Homepage = () => {
     };
     fetchPosts();
   }, []);
+
+  // Double tap to like
+  const handleDoubleTap = useCallback(
+    (postId) => {
+      if (!userInfo) return;
+      handleLike(postId);
+      setLikedPosts((prev) => new Set(prev).add(postId));
+      setTimeout(() => {
+        setLikedPosts((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(postId);
+          return newSet;
+        });
+      }, 1000);
+    },
+    [userInfo]
+  );
 
   // Like handler
   const handleLike = useCallback(
@@ -89,10 +116,7 @@ const Homepage = () => {
         { withCredentials: true }
       );
 
-      // Update logged-in user's following list
       setUserInfo((prev) => ({ ...prev, following: res.data.following }));
-
-      // Optionally, update the posts state to re-render follow buttons
       setPosts((prevPosts) => [...prevPosts]);
     } catch (error) {
       console.log('Error following/unfollowing user', error);
@@ -103,140 +127,238 @@ const Homepage = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center gap-6 p-6 bg-gray-100 min-h-screen">
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="bg-white w-full max-w-md rounded-xl shadow-md overflow-hidden animate-pulse"
-          >
-            <div className="flex items-center gap-3 p-4">
-              <div className="w-10 h-10 rounded-full bg-gray-300" />
-              <div className="h-4 bg-gray-300 rounded w-1/4" />
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-xl mx-auto py-6 px-4">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="bg-white rounded-lg shadow-sm border border-gray-100 mb-6 overflow-hidden animate-pulse"
+            >
+              <div className="p-4 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gray-200" />
+                <div className="space-y-2 flex-1">
+                  <div className="h-3 bg-gray-200 rounded w-1/4" />
+                  <div className="h-2 bg-gray-200 rounded w-1/6" />
+                </div>
+              </div>
+              <div className="w-full h-[500px] bg-gray-200" />
+              <div className="p-4 space-y-3">
+                <div className="h-6 bg-gray-200 rounded w-1/3" />
+                <div className="h-3 bg-gray-200 rounded w-2/3" />
+                <div className="h-3 bg-gray-200 rounded w-1/2" />
+              </div>
             </div>
-            <div className="w-full h-[400px] bg-gray-300" />
-            <div className="p-4 space-y-3">
-              <div className="h-4 bg-gray-300 rounded w-3/4" />
-              <div className="h-3 bg-gray-300 rounded w-1/2" />
-              <div className="h-8 bg-gray-300 rounded w-1/4 mt-4" />
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center gap-6 p-4 md:p-6 bg-gray-50 min-h-screen">
-      {posts.length === 0 ? (
-        <div className="text-center mt-20">
-          <p className="text-gray-500 text-lg">
-            No posts yet. Be the first to share!
-          </p>
-        </div>
-      ) : (
-        posts.map((post) => {
-          const isPostLiked = post.likes.includes(userInfo?._id);
-          const isFollowing = userInfo?.following.includes(post.user._id);
-          const isOwnPost = post.user._id === userInfo?._id;
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <div className="max-w-xl mx-auto py-6 px-4">
+        {posts.length === 0 ? (
+          <div className="text-center mt-32">
+            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center">
+              <FiMessageCircle className="text-4xl text-purple-400" />
+            </div>
+            <h2 className="text-2xl font-light text-gray-800 mb-2">
+              Welcome to PhotoShare
+            </h2>
+            <p className="text-gray-500 mb-8 max-w-md mx-auto">
+              No posts yet. Be the first to share your moments with the
+              community!
+            </p>
+            {userInfo && (
+              <Link
+                to={`/upload/${userInfo._id}`}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full hover:shadow-lg transition-all duration-300"
+              >
+                <span className="font-medium">Share your first photo</span>
+              </Link>
+            )}
+          </div>
+        ) : (
+          posts.map((post) => {
+            const isPostLiked = post.likes.includes(userInfo?._id);
+            const isFollowing = userInfo?.following.includes(post.user._id);
+            const isOwnPost = post.user._id === userInfo?._id;
+            const isDoubleTapLiked = likedPosts.has(post._id);
 
-          return (
-            <div
-              key={post._id}
-              className="bg-white w-full max-w-md rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden"
-            >
-              {/* User Info */}
-              <div className="flex items-center justify-between p-4 border-b">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={
-                      post.user?.profileimg || 'https://via.placeholder.com/40'
-                    }
-                    alt={post.user?.username || 'profile'}
-                    className="w-10 h-10 rounded-full object-cover border border-gray-200"
-                  />
-                  <h3 className="font-semibold text-gray-800">
-                    {post.user?.username || 'Anonymous'}
-                  </h3>
-                </div>
+            return (
+              <div
+                key={post._id}
+                className="bg-white rounded-lg shadow-sm border border-gray-100 mb-8 overflow-hidden transition-all duration-300 hover:shadow-md"
+              >
+                {/* User Header */}
+                <div className="flex items-center justify-between p-4">
+                  <div className="flex items-center gap-3">
+                    <Link
+                      to={`/profile/${post.user.username}`}
+                      className="group"
+                    >
+                      <div className="relative">
+                        <img
+                          src={
+                            post.user?.profileimg ||
+                            'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
+                          }
+                          alt={post.user?.username || 'profile'}
+                          className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm group-hover:scale-105 transition-transform duration-200"
+                        />
+                        <div className="absolute inset-0 rounded-full border-2 border-transparent group-hover:border-purple-300 transition-colors duration-200"></div>
+                      </div>
+                    </Link>
+                    <div>
+                      <Link to={`/profile/${post.user.username}`}>
+                        <h3 className="font-semibold text-gray-900 hover:text-gray-700 transition-colors">
+                          {post.user?.username}
+                        </h3>
+                      </Link>
+                      <p className="text-xs text-gray-500">
+                        {new Date(post.createdAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </p>
+                    </div>
+                  </div>
 
-                {/* Follow Button */}
-                {!isOwnPost && (
-                  <button
-                    onClick={() => handleFollow(post.user._id)}
-                    disabled={followingUserId === post.user._id}
-                    className={`px-4 py-1 rounded-full text-sm font-medium transition-colors ${
-                      isFollowing
-                        ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        : 'bg-blue-500 text-white hover:bg-blue-600'
-                    }`}
-                  >
-                    {isFollowing ? 'Following' : 'Follow'}
-                  </button>
-                )}
-              </div>
-
-              {/* Post Image */}
-              <div className="relative">
-                <img
-                  src={post.img}
-                  alt="post"
-                  className="w-full h-auto max-h-[500px] object-contain bg-gray-100"
-                  loading="lazy"
-                  onError={(e) => {
-                    e.target.src =
-                      'https://via.placeholder.com/400x400?text=Image+Not+Found';
-                  }}
-                />
-              </div>
-
-              {/* Like + Caption */}
-              <div className="p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <button
-                    onClick={() => handleLike(post._id)}
-                    disabled={likingPostId === post._id}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
-                      isPostLiked
-                        ? 'bg-red-500 text-white hover:bg-red-600'
-                        : 'bg-white text-gray-800 border border-gray-300 hover:bg-gray-100'
-                    }`}
-                  >
-                    <span className="text-xl">{isPostLiked ? '❤️' : '🤍'}</span>
-                    <span className="font-medium">
-                      {isPostLiked ? 'Liked' : 'Like'}
-                    </span>
-                  </button>
-
-                  <div className="flex items-center gap-1 text-gray-600">
-                    <span className="text-lg">❤️</span>
-                    <span className="font-medium">
-                      {post.likes.length}{' '}
-                      {post.likes.length === 1 ? 'Like' : 'Likes'}
-                    </span>
+                  <div className="flex items-center gap-2">
+                    {!isOwnPost && (
+                      <button
+                        onClick={() => handleFollow(post.user._id)}
+                        disabled={followingUserId === post.user._id}
+                        className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                          isFollowing
+                            ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            : 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:shadow-md'
+                        }`}
+                      >
+                        {followingUserId === post.user._id
+                          ? '...'
+                          : isFollowing
+                            ? 'Following'
+                            : 'Follow'}
+                      </button>
+                    )}
+                    <button className="p-1.5 hover:bg-gray-100 rounded-full transition-colors">
+                      <FiMoreHorizontal className="text-gray-500" />
+                    </button>
                   </div>
                 </div>
 
-                <p className="text-gray-800">
-                  <span className="font-semibold mr-2">
-                    {post.user?.username || 'Anonymous'}
-                  </span>
-                  {post.text}
-                </p>
+                {/* Post Image with Double Tap */}
+                <div className="relative">
+                  <div
+                    className="w-full cursor-pointer"
+                    onDoubleClick={() => handleDoubleTap(post._id)}
+                  >
+                    <img
+                      src={post.img}
+                      alt="post"
+                      className="w-full h-auto max-h-[600px] object-cover bg-gray-50"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.src =
+                          'https://images.unsplash.com/photo-1542744095-fcf48d80b0fd?w=600&h=600&fit=crop';
+                      }}
+                    />
+                  </div>
 
-                <p className="text-xs text-gray-400 border-t pt-2">
-                  {new Date(post.createdAt).toLocaleDateString('en-US', {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </p>
+                  {/* Double Tap Heart Animation */}
+                  {isDoubleTapLiked && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="animate-ping-slow">
+                        <FaHeart className="text-white text-8xl drop-shadow-2xl" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={() => handleLike(post._id)}
+                        disabled={likingPostId === post._id}
+                        className="p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200"
+                      >
+                        {isPostLiked ? (
+                          <FaHeart className="text-red-500 text-xl" />
+                        ) : (
+                          <FiHeart className="text-gray-900 text-xl" />
+                        )}
+                      </button>
+                      <button className="p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200">
+                        <FiMessageCircle className="text-gray-900 text-xl" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Likes */}
+                  <div className="mb-3">
+                    <p className="font-medium text-gray-900">
+                      {post.likes.length}{' '}
+                      {post.likes.length === 1 ? 'like' : 'likes'}
+                    </p>
+                  </div>
+
+                  {/* Caption */}
+                  <div className="mb-3">
+                    <p className="text-gray-900">{post.text}</p>
+                  </div>
+
+                  {/* Time */}
+                  <p className="text-xs text-gray-400 uppercase tracking-wider">
+                    {new Date(post.createdAt).toLocaleDateString('en-US', {
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </p>
+                </div>
+
+                {/* Add Comment */}
+                <div className="border-t border-gray-100 p-4">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      placeholder="Add a comment..."
+                      className="flex-1 border-none outline-none text-sm placeholder-gray-400"
+                    />
+                    <button className="text-blue-500 font-medium text-sm hover:text-blue-600 transition-colors">
+                      Post
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-          );
-        })
-      )}
+            );
+          })
+        )}
+      </div>
+
+      {/* Add custom animation for ping */}
+      <style jsx>{`
+        @keyframes ping-slow {
+          0% {
+            transform: scale(1);
+            opacity: 1;
+          }
+          70% {
+            transform: scale(2);
+            opacity: 0.7;
+          }
+          100% {
+            transform: scale(3);
+            opacity: 0;
+          }
+        }
+        .animate-ping-slow {
+          animation: ping-slow 1s cubic-bezier(0, 0, 0.2, 1) forwards;
+        }
+      `}</style>
     </div>
   );
 };

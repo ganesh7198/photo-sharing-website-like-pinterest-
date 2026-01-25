@@ -1,29 +1,31 @@
-import { Routes } from 'react-router-dom';
-import { Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Loginpage from './pages/Loginpage';
 import Signup from './pages/Singuppage';
 import LandingPage from './pages/LandingPage';
 import ProtectedRoute from './services/ProtectedRoute';
 import MainLayout from './layout.jsx/MainLayout';
-import { useContext } from 'react';
-import { UserContext } from './context/UserContext';
 import Homepage from './pages/Homepage';
+import Profilepage from './pages/Profilepage';
 
 function App() {
-  const { userInfo } = useContext(UserContext);
   return (
-    <>
-      <Routes>
-        <Route path="/" element={<LandingPage></LandingPage>}></Route>
-        <Route path="/login" element={<Loginpage></Loginpage>}></Route>
-        <Route path="/signup" element={<Signup></Signup>}></Route>
-        <Route element={<ProtectedRoute></ProtectedRoute>}>
-          <Route element={<MainLayout></MainLayout>}>
-            <Route path={`/home`} element={<Homepage></Homepage>}></Route>
-          </Route>
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<Loginpage />} />
+      <Route path="/signup" element={<Signup />} />
+
+      <Route element={<ProtectedRoute />}>
+        <Route element={<MainLayout />}>
+          <Route path="/home" element={<Homepage />} />
+
+          {/* profile by username */}
+          <Route path="/profile/:username" element={<Profilepage />} />
+
+          {/* default profile (logged-in user) */}
+          <Route path="/profile" element={<Profilepage />} />
         </Route>
-      </Routes>
-    </>
+      </Route>
+    </Routes>
   );
 }
 

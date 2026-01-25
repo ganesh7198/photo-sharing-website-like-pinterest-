@@ -11,14 +11,14 @@ const Sidebar = () => {
 
       <ul className="space-y-4">
         <li>
-          <Link to={`/home`} className="hover:text-gray-300">
+          <Link to="/home" className="hover:text-gray-300">
             Home
           </Link>
         </li>
 
         <li>
           <Link
-            to={`/profile/${userInfo?._username}`}
+            to={userInfo ? `/profile/${userInfo.username}` : '/profile'}
             className="hover:text-gray-300"
           >
             Profile
@@ -26,9 +26,14 @@ const Sidebar = () => {
         </li>
 
         <li>
-          <Link to={`/upload/${userInfo?._id}`} className="hover:text-gray-300">
-            Upload
-          </Link>
+          {userInfo && (
+            <Link
+              to={`/upload/${userInfo._id}`}
+              className="hover:text-gray-300"
+            >
+              Upload
+            </Link>
+          )}
         </li>
 
         <li>
