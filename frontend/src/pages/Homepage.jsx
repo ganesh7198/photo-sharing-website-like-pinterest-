@@ -275,7 +275,7 @@ const Homepage = () => {
             </p>
             {userInfo && (
               <Link
-                to={`/upload/${userInfo._id}`}
+                to={`/upload`}
                 className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-purple-500 to-pink-500 text-white rounded-full hover:shadow-lg transition-all duration-300"
               >
                 <span className="font-medium">Share your first photo</span>
