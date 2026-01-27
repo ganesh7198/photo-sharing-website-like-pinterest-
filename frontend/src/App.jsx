@@ -7,6 +7,8 @@ import MainLayout from './layout.jsx/MainLayout';
 import Homepage from './pages/Homepage';
 import Profilepage from './pages/Profilepage';
 import Uploadpage from './pages/Uploadpage';
+import Logout from './components/Logout';
+import NotificationPage from './pages/NotificationPage';
 
 function App() {
   return (
@@ -23,6 +25,11 @@ function App() {
           {/* Default profile - will redirect to /profile/:username */}
           <Route path="/profile" element={<Profilepage />} />
           <Route path="/upload" element={<Uploadpage></Uploadpage>}></Route>
+          <Route path="/logout" element={<Logout />}></Route>
+          <Route
+            path="/notification"
+            element={<NotificationPage></NotificationPage>}
+          ></Route>
         </Route>
       </Route>
     </Routes>

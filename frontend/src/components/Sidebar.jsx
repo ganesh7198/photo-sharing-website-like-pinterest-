@@ -30,11 +30,14 @@ const Sidebar = () => {
             Upload
           </Link>
         </li>
+        <li>
+          <Link to={'/notification'} className="hover:text-gray-300">
+            notification
+          </Link>
+        </li>
 
         <li>
-          <Link to="/logout" className="hover:text-gray-300">
-            Logout
-          </Link>
+          <Link to={'/logout'}>logout</Link>
         </li>
       </ul>
     </div>
